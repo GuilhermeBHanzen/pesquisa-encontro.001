@@ -348,7 +348,7 @@
     <p>Sua opinião sobre o Encontro nº 001 é importante para nós e será usada para calibrar encontros futuros.</p>
     <div class="proto">
       <span>PROT. 001/2026</span>
-      <span id="dur">DURAÇÃO EST.: 2 MIN</span>
+      <span id="dur">DURAÇÃO EST.: 3 MIN</span>
     </div>
     <div class="stamp" id="stamp">Aguardando parecer</div>
   </div>
@@ -414,6 +414,25 @@
       ]
     },
     {
+      id:"nutri", type:"text",
+      text:"Módulo técnico: parecer profissional sobre a alimentação do anfitrião.",
+      hint:"Sim, isto é uma consulta gratuita disfarçada de pesquisa de satisfação. O anfitrião reconhece a manobra e aguarda as orientações mesmo assim."
+    },
+    {
+      id:"flores", type:"choice",
+      text:"Declare sua preferência floral para fins de planejamento logístico.",
+      hint:"Campo obrigatório. Esta informação não será usada para absolutamente nada.",
+      opts:[
+        "Rosas",
+        "Girassóis",
+        "Tulipas",
+        "Lírios",
+        "Não gosto de flores (resposta registrada com estranheza)"
+      ],
+      other:"Outra — especifique",
+      otherPh:"Nome da flor. Seja específica: o anfitrião não sabe nada de botânica."
+    },
+    {
       id:"v2", type:"text",
       text:"Sugestões para a versão 2.0.",
       hint:"Campo aberto. Tudo que você escrever aqui será levado a sério, infelizmente."
@@ -447,7 +466,9 @@
       q.opts.forEach(function(o,k){
         h += '<button type="button" class="opt" data-v="'+k+'">'+o+'</button>';
       });
+      if(q.other) h += '<button type="button" class="opt" data-v="__o">'+q.other+'</button>';
       h += '</div>';
+      if(q.other) h += '<div id="oWrap" hidden><textarea id="oTxt" style="min-height:64px" placeholder="'+(q.otherPh||'Escreva aqui.')+'"></textarea></div>';
     } else {
       h += '<textarea id="ta" placeholder="Ex.: menos parentes, mais sobremesa."></textarea>';
     }
@@ -478,23 +499,59 @@
         ans[q.id] = +b.dataset.v;
         next.disabled = false;
       });
+      if(typeof ans[q.id] === "number"){
+        var sb = sc.querySelector('[data-v="'+ans[q.id]+'"]');
+        if(sb) sb.classList.add("on");
+        next.disabled = false;
+      }
     } else if(q.type === "choice"){
       var op = document.getElementById("op");
+      var oWrap = document.getElementById("oWrap");
+      var oTxt = document.getElementById("oTxt");
+
       op.addEventListener("click", function(e){
         var b = e.target.closest(".opt"); if(!b) return;
         Array.prototype.forEach.call(op.children, function(c){ c.classList.remove("on"); });
         b.classList.add("on");
-        ans[q.id] = +b.dataset.v;
-        ansTxt[q.id] = b.textContent;
-        next.disabled = false;
+        if(b.dataset.v === "__o"){
+          oWrap.hidden = false;
+          oTxt.focus();
+          var v = oTxt.value.trim();
+          ans[q.id] = v; ansTxt[q.id] = v;
+          next.disabled = v.length < 2;
+        } else {
+          if(oWrap) oWrap.hidden = true;
+          ans[q.id] = +b.dataset.v;
+          ansTxt[q.id] = b.textContent;
+          next.disabled = false;
+        }
       });
+
+      if(oTxt){
+        oTxt.addEventListener("input", function(){
+          var v = oTxt.value.trim();
+          ans[q.id] = v; ansTxt[q.id] = v;
+          next.disabled = v.length < 2;
+        });
+      }
+
+      if(typeof ans[q.id] === "string" && oTxt){
+        var ob = op.querySelector('[data-v="__o"]');
+        if(ob) ob.classList.add("on");
+        oWrap.hidden = false;
+        oTxt.value = ans[q.id];
+        next.disabled = ans[q.id].length < 2;
+      } else if(typeof ans[q.id] === "number"){
+        var cb = op.querySelector('[data-v="'+ans[q.id]+'"]');
+        if(cb) cb.classList.add("on");
+        next.disabled = false;
+      }
     } else {
       var ta = document.getElementById("ta");
       ta.addEventListener("input", function(){ next.disabled = ta.value.trim().length < 3; });
-      next.disabled = true;
+      if(typeof ans[q.id] === "string") ta.value = ans[q.id];
+      next.disabled = ta.value.trim().length < 3;
     }
-
-    if(ans[q.id] !== undefined && q.type !== "text") next.disabled = false;
   }
 
   var STEPS = [
@@ -595,6 +652,10 @@
     L.push("Relato a terceiros: " + (ansTxt.relato || "-"));
     L.push("Encerramento: " + (ansTxt.beijo || "-"));
     L.push("Ponto de melhoria: " + (ansTxt.melhoria || "-"));
+    L.push("Preferencia floral: " + (ansTxt.flores || "-"));
+    L.push("");
+    L.push("Parecer nutricional:");
+    L.push(ans.nutri || "-");
     L.push("");
     L.push("Sugestões para a v2.0:");
     L.push(ans.v2 || "-");
