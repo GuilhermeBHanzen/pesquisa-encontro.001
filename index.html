@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light only">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pesquisa de Satisfação — Encontro nº 001</title>
+<style>
+  :root{
+    --paper:#EDEEF0;
+    --card:#FFFFFF;
+    --ink:#1A1D21;
+    --ink-soft:#5B6470;
+    --inst:#21497B;
+    --stamp:#C23A2B;
+    --rule:#CBD0D6;
+    --fill:#F5F6F8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:20px 16px 48px;
+    display:flex;
+    justify-content:center;
+  }
+  .sheet{
+    width:100%;
+    max-width:520px;
+  }
+
+  /* ---------- cabeçalho do formulário ---------- */
+  .head{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-top:5px solid var(--inst);
+    padding:22px 20px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .org{
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--inst);
+    font-weight:700;
+    margin:0 0 14px;
+  }
+  .head h1{
+    font-size:25px;
+    line-height:1.15;
+    font-weight:700;
+    margin:0 0 6px;
+    letter-spacing:-.02em;
+    max-width:15ch;
+  }
+  .head p{
+    margin:0;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    max-width:44ch;
+  }
+  .proto{
+    margin-top:16px;
+    padding-top:12px;
+    border-top:1px solid var(--rule);
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .stamp{
+    position:absolute;
+    top:52px;
+    right:-14px;
+    transform:rotate(-11deg);
+    border:2.5px solid var(--stamp);
+    color:var(--stamp);
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.1em;
+    padding:5px 9px;
+    text-transform:uppercase;
+    opacity:.72;
+    line-height:1;
+  }
+
+  /* ---------- progresso ---------- */
+  .bar{
+    height:4px;
+    background:var(--rule);
+    position:relative;
+  }
+  .bar i{
+    position:absolute;
+    inset:0 auto 0 0;
+    width:0;
+    background:var(--inst);
+    transition:width .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ---------- corpo ---------- */
+  .body{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-top:0;
+    padding:22px 20px 20px;
+  }
+  .qmeta{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .qtext{
+    font-size:19px;
+    line-height:1.32;
+    font-weight:600;
+    margin:0 0 4px;
+    letter-spacing:-.01em;
+  }
+  .qhint{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:6px 0 0;
+  }
+  .opts{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+  .opt{
+    display:block;
+    width:100%;
+    text-align:left;
+    font:inherit;
+    font-size:15px;
+    line-height:1.35;
+    color:var(--ink);
+    background:var(--fill);
+    border:1px solid var(--rule);
+    padding:13px 14px;
+    cursor:pointer;
+    position:relative;
+    padding-left:40px;
+  }
+  .opt::before{
+    content:"";
+    position:absolute;
+    left:14px;
+    top:14px;
+    width:14px;
+    height:14px;
+    border:1.5px solid #98A1AC;
+    border-radius:50%;
+    background:#fff;
+  }
+  .opt:hover{border-color:var(--inst)}
+  .opt:focus-visible{outline:2px solid var(--inst);outline-offset:2px}
+  .opt.on{border-color:var(--inst);background:#EAF0F8}
+  .opt.on::before{border-color:var(--inst);background:var(--inst);box-shadow:inset 0 0 0 2.5px #fff}
+
+  /* escala NPS */
+  .scale{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:18px}
+  .scale button{
+    font:inherit;
+    font-size:15px;
+    font-weight:600;
+    padding:12px 0;
+    background:var(--fill);
+    border:1px solid var(--rule);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .scale button:hover{border-color:var(--inst)}
+  .scale button:focus-visible{outline:2px solid var(--inst);outline-offset:2px}
+  .scale button.on{background:var(--inst);border-color:var(--inst);color:#fff}
+  .ends{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:8px;
+  }
+
+  textarea{
+    width:100%;
+    margin-top:18px;
+    min-height:110px;
+    font:inherit;
+    font-size:16px;
+    padding:12px;
+    border:1px solid var(--rule);
+    background:var(--fill);
+    resize:vertical;
+    color:var(--ink);
+  }
+  textarea:focus{outline:2px solid var(--inst);outline-offset:-1px;background:#fff}
+
+  .foot{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--rule);
+  }
+  .btn{
+    font:inherit;
+    font-size:15px;
+    font-weight:600;
+    padding:12px 20px;
+    border:1px solid var(--inst);
+    background:var(--inst);
+    color:#fff;
+    cursor:pointer;
+  }
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .btn.ghost{background:transparent;color:var(--inst)}
+  .note{font-size:12px;color:var(--ink-soft);margin-left:auto;text-align:right}
+  @media (max-width:360px){
+    .note{display:none}
+    .scale{gap:5px}
+    .scale button{font-size:14px;padding:11px 0}
+    .head h1{font-size:22px}
+    .qtext{font-size:18px}
+  }
+
+  /* ---------- processando ---------- */
+  .load{padding:46px 20px;text-align:center}
+  .load p{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0;
+    min-height:1.5em;
+  }
+  .dots{
+    width:36px;height:3px;background:var(--rule);
+    margin:0 auto 22px;position:relative;overflow:hidden;
+  }
+  .dots::after{
+    content:"";position:absolute;inset:0;width:40%;
+    background:var(--inst);animation:slide 1s linear infinite;
+  }
+  @keyframes slide{from{left:-40%}to{left:100%}}
+
+  /* ---------- resultado ---------- */
+  .score{
+    text-align:center;
+    padding:8px 0 20px;
+    border-bottom:1px solid var(--rule);
+  }
+  .score b{
+    display:block;
+    font-size:62px;
+    line-height:1;
+    font-weight:700;
+    letter-spacing:-.04em;
+    color:var(--inst);
+  }
+  .score span{font-size:13px;color:var(--ink-soft)}
+  .verdict{
+    font-size:16px;
+    line-height:1.45;
+    margin:20px 0 0;
+  }
+  .panel{
+    margin-top:22px;
+    border:1px solid var(--rule);
+    border-left:4px solid var(--stamp);
+    background:var(--fill);
+    padding:16px 16px 14px;
+  }
+  .panel h2{
+    font-size:15px;
+    margin:0 0 3px;
+    font-weight:700;
+  }
+  .panel .src{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .quote{
+    margin:0 0 12px;
+    padding-left:12px;
+    border-left:2px solid var(--rule);
+    font-size:14.5px;
+    line-height:1.5;
+  }
+  .quote:last-of-type{margin-bottom:0}
+  .quote cite{
+    display:block;
+    font-style:normal;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .reveal{opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  .sched{margin-top:26px;padding-top:20px;border-top:1px solid var(--rule)}
+  .sched h3{font-size:16px;margin:0 0 4px}
+  .sched p{font-size:13px;color:var(--ink-soft);margin:0}
+
+  .done{padding:34px 20px;text-align:center}
+  .done .big{font-size:22px;font-weight:700;margin:0 0 10px;letter-spacing:-.02em}
+  .done p{font-size:15px;color:var(--ink-soft);margin:0 auto;max-width:34ch}
+  .done .approved{
+    display:inline-block;
+    border:2.5px solid #2E7D4F;
+    color:#2E7D4F;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.1em;
+    padding:6px 12px;
+    text-transform:uppercase;
+    transform:rotate(-4deg);
+    margin-bottom:22px;
+  }
+
+  .legal{
+    font-size:11px;
+    color:#8B939C;
+    text-align:center;
+    margin:14px 0 0;
+    line-height:1.5;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="head">
+    <p class="org">Departamento de Experiência do Usuário</p>
+    <h1>Pesquisa de satisfação</h1>
+    <p>Sua opinião sobre o Encontro nº 001 é importante para nós e será usada para calibrar encontros futuros.</p>
+    <div class="proto">
+      <span>PROT. 001/2026</span>
+      <span id="dur">DURAÇÃO EST.: 2 MIN</span>
+    </div>
+    <div class="stamp" id="stamp">Aguardando parecer</div>
+  </div>
+
+  <div class="bar"><i id="prog"></i></div>
+
+  <div class="body" id="app"></div>
+
+  <p class="legal">Nada sai daqui sem você apertar o botão no final. Até lá, o anfitrião não vê nada — por mais que ele gostaria.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var Q = [
+    {
+      id:"nps", type:"scale",
+      text:"Qual a probabilidade de você recomendar este encontro a uma amiga?",
+      hint:"Considere o pacote completo, não apenas os destaques."
+    },
+    {
+      id:"pais", type:"choice",
+      text:"Avalie o módulo “Jantar com os pais do anfitrião”.",
+      hint:"Lembrete: este módulo não constava no cronograma divulgado.",
+      opts:[
+        "Adequado",
+        "Inesperado, porém funcional",
+        "Gostaria de ter sido avisada com 48h de antecedência",
+        "Segui o fluxo sem entender o que estava acontecendo"
+      ]
+    },
+    {
+      id:"relato", type:"choice",
+      text:"Qual foi o intervalo entre o fim do encontro e o primeiro relato a terceiros?",
+      hint:"Terceiros: amigas, irmã, grupo do WhatsApp, qualquer pessoa.",
+      opts:[
+        "Menos de 10 minutos — ainda no caminho de casa",
+        "Na mesma noite",
+        "No dia seguinte, sob interrogatório",
+        "Não comentei com ninguém (resposta em análise pela auditoria)"
+      ]
+    },
+    {
+      id:"beijo", type:"choice",
+      text:"Classifique o encerramento do encontro.",
+      hint:"Item não previsto em contrato.",
+      opts:[
+        "Improviso bem executado",
+        "Estava no cronograma desde o início e todos sabiam",
+        "Erro de sistema — solicito rollback",
+        "Resultado inconclusivo, solicito repetição do teste"
+      ]
+    },
+    {
+      id:"melhoria", type:"choice",
+      text:"Qual item apresentou maior necessidade de melhoria?",
+      opts:[
+        "Volume de piadas por minuto",
+        "Escolha do local",
+        "Quantidade de familiares presentes",
+        "Nenhum — foi impecável (opção patrocinada pelo anfitrião)"
+      ]
+    },
+    {
+      id:"v2", type:"text",
+      text:"Sugestões para a versão 2.0.",
+      hint:"Campo aberto. Tudo que você escrever aqui será levado a sério, infelizmente."
+    }
+  ];
+
+  var app = document.getElementById("app");
+  var prog = document.getElementById("prog");
+  var i = 0;
+  var ans = {};
+  var ansTxt = {};
+
+  function setProg(p){ prog.style.width = Math.round(p*100) + "%"; }
+
+  function render(){
+    var q = Q[i];
+    setProg(i / (Q.length + 1));
+
+    var h = '<p class="qmeta">QUESTÃO ' + (i+1) + ' DE ' + Q.length + '</p>';
+    h += '<p class="qtext">' + q.text + '</p>';
+    if(q.hint) h += '<p class="qhint">' + q.hint + '</p>';
+
+    if(q.type === "scale"){
+      h += '<div class="scale" id="sc">';
+      for(var n=0;n<=10;n++){
+        h += '<button type="button" data-v="'+n+'">'+n+'</button>';
+      }
+      h += '</div><div class="ends"><span>0 — jamais</span><span>10 — já recomendei</span></div>';
+    } else if(q.type === "choice"){
+      h += '<div class="opts" id="op">';
+      q.opts.forEach(function(o,k){
+        h += '<button type="button" class="opt" data-v="'+k+'">'+o+'</button>';
+      });
+      h += '</div>';
+    } else {
+      h += '<textarea id="ta" placeholder="Ex.: menos parentes, mais sobremesa."></textarea>';
+    }
+
+    h += '<div class="foot">';
+    h += '<button class="btn" id="next" disabled>' + (i === Q.length-1 ? "Enviar avaliação" : "Continuar") + '</button>';
+    if(i > 0) h += '<button class="btn ghost" id="back">Voltar</button>';
+    h += '<span class="note">Respostas salvas<br>automaticamente</span>';
+    h += '</div>';
+
+    app.innerHTML = h;
+
+    var next = document.getElementById("next");
+    var prev = document.getElementById("back");
+    if(prev) prev.onclick = function(){ i--; render(); };
+    next.onclick = function(){
+      if(q.type === "text") ans[q.id] = document.getElementById("ta").value.trim();
+      i++;
+      if(i >= Q.length) finish(); else render();
+    };
+
+    if(q.type === "scale"){
+      var sc = document.getElementById("sc");
+      sc.addEventListener("click", function(e){
+        var b = e.target.closest("button"); if(!b) return;
+        Array.prototype.forEach.call(sc.children, function(c){ c.classList.remove("on"); });
+        b.classList.add("on");
+        ans[q.id] = +b.dataset.v;
+        next.disabled = false;
+      });
+    } else if(q.type === "choice"){
+      var op = document.getElementById("op");
+      op.addEventListener("click", function(e){
+        var b = e.target.closest(".opt"); if(!b) return;
+        Array.prototype.forEach.call(op.children, function(c){ c.classList.remove("on"); });
+        b.classList.add("on");
+        ans[q.id] = +b.dataset.v;
+        ansTxt[q.id] = b.textContent;
+        next.disabled = false;
+      });
+    } else {
+      var ta = document.getElementById("ta");
+      ta.addEventListener("input", function(){ next.disabled = ta.value.trim().length < 3; });
+      next.disabled = true;
+    }
+
+    if(ans[q.id] !== undefined && q.type !== "text") next.disabled = false;
+  }
+
+  var STEPS = [
+    "Recebendo formulário…",
+    "Validando respostas…",
+    "Cruzando com dados da Comissão Avaliadora…",
+    "Aguardando liberação do parecer…",
+    "Parecer liberado."
+  ];
+
+  function finish(){
+    setProg(1);
+    app.innerHTML = '<div class="load"><div class="dots"></div><p id="st"></p></div>';
+    var st = document.getElementById("st");
+    var k = 0;
+    st.textContent = STEPS[0];
+    var t = setInterval(function(){
+      k++;
+      if(k >= STEPS.length){ clearInterval(t); results(); return; }
+      st.textContent = STEPS[k];
+    }, 850);
+  }
+
+  function verdict(n){
+    if(n >= 9) return "Nota acima do esperado. O anfitrião foi notificado e já está insuportável.";
+    if(n >= 7) return "Nota sólida, considerando que você conheceu a família inteira antes da sobremesa.";
+    if(n >= 5) return "Nota mediana. Compatível com um encontro que incluiu ex-namorados e os pais na mesma noite.";
+    return "Nota baixa, mas você respondeu o formulário inteiro. As ações falam mais alto que os números.";
+  }
+
+  function results(){
+    var n = ans.nps;
+    var h = '';
+    h += '<div class="score"><b>'+n+'</b><span>índice de satisfação declarado</span></div>';
+    h += '<p class="verdict">'+verdict(n)+'</p>';
+
+    h += '<div class="panel reveal" id="pan">';
+    h += '<h2>Parecer da Comissão Avaliadora</h2>';
+    h += '<p class="src">FONTE: JANTAR — MESA PRINCIPAL — ENCONTRO Nº 001</p>';
+    h += '<p class="quote">Uma menina muito linda e doce.<cite>— Mãe do anfitrião, membro titular</cite></p>';
+    h += '<p class="quote">Muito inteligente, simpática e centrada.<cite>— Padrasto do anfitrião, membro titular</cite></p>';
+    h += '<p class="quote">Parecer unânime e favorável. A Comissão já perguntou duas vezes quando você volta.<cite>— Ata da reunião</cite></p>';
+    h += '</div>';
+
+    h += '<div class="sched reveal" id="sch">';
+    h += '<h3>Encontro nº 002</h3>';
+    h += '<p>Confirmado que haverá um. Falta definir onde.</p>';
+    h += '<div class="opts" id="op2">';
+    h += '<button type="button" class="opt" data-v="Igreja">Igreja</button>';
+    h += '<button type="button" class="opt" data-v="Bar">Bar</button>';
+    h += '<button type="button" class="opt" data-v="Hamburgueria">Hamburgueria</button>';
+    h += '<button type="button" class="opt" data-v="Passeio">Um passeio, sem destino definido</button>';
+    h += '<button type="button" class="opt" data-v="__outro">Outro — eu decido</button>';
+    h += '</div>';
+    h += '<div id="outro" hidden>';
+    h += '<textarea id="outroTxt" style="min-height:74px" placeholder="Escreva aqui. O anfitrião vai concordar de qualquer forma."></textarea>';
+    h += '<div class="foot" style="border-top:0;margin-top:12px"><button class="btn" id="outroOk" disabled>Confirmar local</button></div>';
+    h += '</div>';
+    h += '</div>';
+
+    app.innerHTML = h;
+
+    document.getElementById("stamp").textContent = "Parecer emitido";
+
+    setTimeout(function(){ document.getElementById("pan").classList.add("in"); }, 250);
+    setTimeout(function(){ document.getElementById("sch").classList.add("in"); }, 700);
+
+    var op2 = document.getElementById("op2");
+    var outro = document.getElementById("outro");
+    var outroTxt = document.getElementById("outroTxt");
+    var outroOk = document.getElementById("outroOk");
+
+    op2.addEventListener("click", function(e){
+      var b = e.target.closest(".opt"); if(!b) return;
+      Array.prototype.forEach.call(op2.children, function(c){ c.classList.remove("on"); });
+      b.classList.add("on");
+      if(b.dataset.v === "__outro"){
+        outro.hidden = false;
+        outroTxt.focus();
+      } else {
+        outro.hidden = true;
+        done(b.dataset.v);
+      }
+    });
+
+    outroTxt.addEventListener("input", function(){
+      outroOk.disabled = outroTxt.value.trim().length < 2;
+    });
+    outroOk.onclick = function(){ done(outroTxt.value.trim()); };
+  }
+
+  function comprovante(choice){
+    var L = [];
+    L.push("COMPROVANTE DE AVALIAÇÃO — PROT. 001/2026");
+    L.push("");
+    L.push("Índice de satisfação: " + ans.nps + "/10");
+    L.push("Jantar com os pais: " + (ansTxt.pais || "-"));
+    L.push("Relato a terceiros: " + (ansTxt.relato || "-"));
+    L.push("Encerramento: " + (ansTxt.beijo || "-"));
+    L.push("Ponto de melhoria: " + (ansTxt.melhoria || "-"));
+    L.push("");
+    L.push("Sugestões para a v2.0:");
+    L.push(ans.v2 || "-");
+    L.push("");
+    L.push("Encontro nº 002 — local escolhido:");
+    L.push(choice);
+    return L.join("\n");
+  }
+
+  function done(choice){
+    var txt = comprovante(choice);
+    app.innerHTML =
+      '<div class="done">' +
+      '<span class="approved">Encontro nº 002 aprovado</span>' +
+      '<p class="big">Local registrado: “'+choice+'”</p>' +
+      '<p>Agora manda o comprovante pra ele. Foi uma tarde livre inteira construindo isso, o mínimo é o retorno.</p>' +
+      '<div class="foot" style="justify-content:center;border-top:0;margin-top:22px">' +
+      '<button class="btn" id="send">Enviar comprovante</button>' +
+      '<button class="btn ghost" id="copy">Copiar</button>' +
+      '</div></div>';
+
+    document.getElementById("dur").textContent = "STATUS: CONCLUÍDO";
+
+    document.getElementById("send").onclick = function(){
+      window.open("https://wa.me/5547992449941?text=" + encodeURIComponent(txt), "_blank");
+    };
+    document.getElementById("copy").onclick = function(){
+      var b = this;
+      navigator.clipboard.writeText(txt).then(function(){
+        b.textContent = "Copiado";
+      }).catch(function(){
+        b.textContent = "Não deu, use o botão ao lado";
+      });
+    };
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
